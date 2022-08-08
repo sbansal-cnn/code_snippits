@@ -1,0 +1,2 @@
+fig, ax = plt.subplots(figsize=(15,10))
+sns.boxplot(data=df, width= 0.5,ax=ax,  fliersize=3)
