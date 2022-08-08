@@ -1,0 +1,10 @@
+df.isnull().sum()
+
+
+df.dtypes
+
+display(df.iloc[:5,:5].isnull().any())
+
+
+df_zion = df_zion.rename(columns = {'DATE': 'Date', 
+                          'DATAVALUE': 'duvTotal'})
