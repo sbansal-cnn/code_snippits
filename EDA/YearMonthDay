@@ -1,0 +1,4 @@
+duv_df['year']=duv_df.index.year
+duv_df['month']=duv_df.index.month
+duv_df['day']=duv_df.index.day
+duv_df.head()
