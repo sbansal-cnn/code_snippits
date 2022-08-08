@@ -1,0 +1,10 @@
+plt.figure(figsize=(20,25), facecolor='ivory')
+plotnumber = 1
+
+for column in df:
+    if plotnumber<=9 :     # as there are 9 columns in the data
+        ax = plt.subplot(3,3,plotnumber)
+        sns.distplot(df[column])
+        plt.xlabel(column,fontsize=20)
+    plotnumber+=1
+plt.show()
