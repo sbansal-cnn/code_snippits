@@ -1,0 +1,29 @@
+q = diabetes['Pregnancies'].quantile(0.98)
+# we are removing the top 2% data from the Pregnancies column
+data_cleaned = diabetes[diabetes['Pregnancies']<q]
+q = data_cleaned['BMI'].quantile(0.99)
+
+
+
+# we are removing the top 1% data from the BMI column
+data_cleaned  = data_cleaned[data_cleaned['BMI']<q]
+q = data_cleaned['SkinThickness'].quantile(0.99)
+
+# we are removing the top 1% data from the SkinThickness column
+data_cleaned  = data_cleaned[data_cleaned['SkinThickness']<q]
+q = data_cleaned['Insulin'].quantile(0.95)
+
+# we are removing the top 5% data from the Insulin column
+data_cleaned  = data_cleaned[data_cleaned['Insulin']<q]
+q = data_cleaned['DiabetesPedigreeFunction'].quantile(0.99)
+
+# we are removing the top 1% data from the DiabetesPedigreeFunction column
+data_cleaned  = data_cleaned[data_cleaned['DiabetesPedigreeFunction']<q]
+q = data_cleaned['Age'].quantile(0.99)
+
+# we are removing the top 1% data from the Age column
+data_cleaned  = data_cleaned[data_cleaned['Age']<q]
+
+# Revisit Outliers with boxplot
+fig, ax = plt.subplots(figsize=(15,10))
+sns.boxplot(data=diabetes, width= 0.5,ax=ax,  fliersize=3)
