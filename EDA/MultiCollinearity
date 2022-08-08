@@ -1,0 +1,8 @@
+All the VIF values are less than 5 and are very low. That means no multicollinearity. Now, we can go ahead with fitting our data to the model. Before that, let's split our data in test and training set.
+
+X = diabetes.drop(columns = ['Outcome'])
+y = diabetes['Outcome']
+
+vif = pd.DataFrame()
+vif["Variance inflation factor"] = [variance_inflation_factor(X_scaled,i) for i in range(X_scaled.shape[1])]
+vif["Features"] = X.columns
