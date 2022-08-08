@@ -1,0 +1,10 @@
+duv_df = pd.pivot_table(
+    data=df_zion,
+    values="duvTotal", 
+    index="Date", 
+    columns="PLATFORM", 
+    aggfunc=np.sum, 
+    fill_value=0,
+sort = True)
+
+duv_df.head()
