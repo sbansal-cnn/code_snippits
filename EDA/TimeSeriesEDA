@@ -1,0 +1,17 @@
+
+
+duv_df.plot(label='mobile-web', color=['orange', 'green','blue','red'])
+# remove scientific notation
+
+# adding title
+plt.title('DUV over time each platform')
+  
+# adding label to x-axis
+plt.xlabel('Time')
+  
+# adding legend.
+plt.legend();
+
+
+# change figure size
+plt.gcf().set_size_inches(18, 5)
