@@ -1,0 +1,3 @@
+from ZION_ENRICHED.USER.USER_VIEWED_COMPONENT
+
+df1 = df['IS_REGISTERED_USER'] = df['conversion'].apply(lambda x: 1 if x == 'True' else 0)
