@@ -1,0 +1,6 @@
+select 
+    event_date,
+    count(distinct zion_anon_id) as duv
+from analytics.product.mart_user_viewed_page
+where event_date >= current_date-5
+group by 1 order by 1
