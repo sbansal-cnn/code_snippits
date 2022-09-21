@@ -1,0 +1,23 @@
+SELECT canonical_url,
+    CASE 
+       WHEN canonical_url = 'https://www.cnn.com' THEN 'homepage'
+        WHEN canonical_url LIKE 'https://www.cnn.com/%' THEN 'article'
+        ELSE substr(canonical_url, 1,20)
+        END as content_type,
+        platform_modality
+        from analytics.product.mart_user_viewed_page
+        where event_date = current_date-3
+        and canonical_url not like '%edition.cnn.com%'
+        and canonical_url not like '%https://cnnespanol%'
+        and canonical_url not like 'https://z.cdp-dev.cn%'
+        and canonical_url not like '%https://www.cnn.com/markets%'
+        and canonical_url not like '%https://www.cnn.com/videos%'
+        and canonical_url not like 'https://www.cnn.com/audio%'
+        and canonical_url not like '%https://www.cnn.com/account/confirm%'
+        and canonical_url not like  '%https://arabic.cnn.com%'
+        and canonical_url not like '%https://www.cnn.com/profiles%'
+        and canonical_url not like '%https://money.cnn.com/data%'
+        and canonical_url not like '%https://money.cnn.com/quote%'
+        and canonical_url not like 'networktv'
+        and platform_modality <> 'mobile-native';
+      
