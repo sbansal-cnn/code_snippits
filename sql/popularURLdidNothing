@@ -1,0 +1,102 @@
+with pageviews as (
+SELECT
+      platform_modality,
+      zion_anon_id,
+      event_date,
+      canonical_url,
+      min(event_timestamp) first_timestamp,
+      COUNT (distinct event_id) n_pageviews
+          FROM "ANALYTICS"."PRODUCT"."MART_USER_VIEWED_PAGE"
+          GROUP BY 1,2,3,4
+          ),
+events as(
+SELECT
+    zion_anon_id,
+    event_date
+    FROM "ANALYTICS"."PRODUCT"."MART_USER_CLICKED_LINK_GENERIC"
+    WHERE event_date between '2022-08-01' and '2022-08-31'
+    AND platform_modality in ('computer-browser','mobile-browser')
+    GROUP BY zion_anon_id, event_date
+    UNION ALL
+SELECT
+    zion_anon_id,
+    event_date
+    FROM "ANALYTICS"."PRODUCT"."MART_USER_CLICKED_ZJS"
+    WHERE event_date between '2022-08-01' and '2022-08-31'
+    AND platform_modality in ('computer-browser','mobile-browser')
+    GROUP BY zion_anon_id, event_date
+    UNION ALL
+SELECT
+    zion_anon_id,
+    event_date
+    FROM "ANALYTICS"."PRODUCT"."MART_USER_PLAYED_VIDEO"
+    WHERE event_date between '2022-08-01' and '2022-08-31'
+    AND platform_modality in ('computer-browser','mobile-browser')
+    GROUP BY zion_anon_id, event_date
+),
+events_deduped as (
+    select zion_anon_id, event_date
+    from events
+    group by 1,2
+),
+components as (
+SELECT 
+    zion_anon_id, 
+    event_date,
+	max(event_timestamp) as last_timestamp
+	FROM ZION_ENRICHED.USER.USER_COMPONENT_ON  
+    GROUP BY 1,2
+),
+aggregate as (
+SELECT 
+  zion_anon_id, 
+  event_date,
+  platform_modality,
+  canonical_url,
+  CASE
+    WHEN p.canonical_url LIKE 'https://www.cnn.com' THEN 'homepage'
+    WHEN p.canonical_url LIKE 'https://www.cnn.com/%' THEN 'article'
+        ELSE NULL
+        END AS content_type,
+  CASE
+     WHEN datediff('sec', p.first_timestamp, c.last_timestamp) between 0 and 120 THEN 1        
+     ELSE 0 END as doNothingFLag, 
+       datediff('sec', p.first_timestamp, c.last_timestamp)time_on_page 
+       from pageviews p
+  left join components c using (zion_anon_id, event_date)
+        WHERE p.first_timestamp < c.last_timestamp
+        and canonical_url not like '%//arabic.cnn%'
+        AND canonical_url not like '%//espanol.cnn%'
+        and canonical_url not like '%edition.cnn.com%'
+        and canonical_url not like 'https://z.cdp-dev.cn%'
+        and canonical_url not like '%https://www.cnn.com/markets%'
+        and canonical_url not like '%https://www.cnn.com/videos%'
+        and canonical_url not like 'https://www.cnn.com/audio%'
+        and canonical_url not like'%https://www.cnn.com/account/confirm%'
+        and canonical_url not like  '%https://arabic.cnn.com%'
+        and canonical_url not like '%https://www.cnn.com/profiles%'
+        and canonical_url not like '%https://money.cnn.com/data%'
+        and canonical_url not like '%https://money.cnn.com/quote%'
+        and canonical_url not like '%https://www.cnn.com/us%'
+        and canonical_url not like '%https://www.cnn.com/world%'
+        and canonical_url not like 'networktv'
+        and event_date between '2022-08-01' and '2022-08-31'
+        and first_timestamp < c.last_timestamp
+        and platform_modality <> 'mobile-native'
+  group by 1,2,3,4,5,6,7
+)
+SELECT 
+    platform_modality,
+    content_type,
+    canonical_url,
+    count(distinct zion_anon_id) as users,
+    time_on_page <=12,
+    count(distinct 
+    CASE WHEN doNothingFlag = 1 
+    THEN ZION_ANON_ID END )/ count(distinct zion_anon_id)  as percentDoNothing 
+    from aggregate
+    WHERE platform_modality in ('computer-browser','mobile-browser')
+    and time_on_page between 0 and 12 = True
+    and content_type = 'article'
+    group by 1,2,3,5
+    order by users desc
