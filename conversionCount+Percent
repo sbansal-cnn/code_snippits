@@ -1,9 +1,0 @@
-df.conversion.sum()
-
-# Total Conversion Count
-
-print ('total conversion: %i out of %i' %(df.conversion.sum(),df.shape[0]))df.conversion.sum()
-
-#  Conversion percentage
-
-print ('total conversion: %i out of %i' %(df.conversion.sum(),df.shape[0]))
