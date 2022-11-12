@@ -1,0 +1,25 @@
+WITH time_on_page_events AS (
+      SELECT DISTINCT
+      pv.zion_view_id,
+      DATE_PART(EPOCH_SECOND, cp.event_timestamp) - DATE_PART(EPOCH_SECOND, pv.event_timestamp) AS duration_seconds
+      FROM
+      ZION_CLEANED.EVENTS.STG_COMPONENT_ON_SCREEN cp INNER JOIN ZION_CLEANED.EVENTS.STG_PAGEVIEW pv
+      ON cp.zion_view_id = pv.zion_view_id
+      WHERE( cp.event_timestamp >= '2022-04-14 00:00:00'
+      AND cp.event_timestamp < '2022-05-01 00:00:00')
+      AND (pv.event_timestamp >= '2022-04-14 00:00:00'
+      AND pv.event_timestamp < '2022-05-01 00:00:00')
+      AND cp.app_id = 'cnn.ios'
+      AND cp.component_type = 'outbrain_smartfeed'
+      GROUP BY 1, 2)
+SELECT
+    top.zion_view_id,
+    title,
+    COUNT(top.duration_seconds) AS num_samples,
+    ARRAY_AGG(top.duration_seconds) as duration_seconds
+    FROM time_on_page_events top
+    INNER JOIN CNN_ZION.CNN_CMS.CNN_CMS_CAPTURE cms ON top.zion_view_id = zion_view_id
+    GROUP BY 1, 2
+    HAVING
+    num_samples = 20
+    LIMIT 200 
