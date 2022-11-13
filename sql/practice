@@ -1,0 +1,108 @@
+// Which platform is driving the most sessions?
+select platform_modality,
+count(distinct event_date) as sessions
+from ANALYTICS.PRODUCT.MART_USER_VIEWED_PAGE
+WHERE event_date between '2022-06-01' and '2022-06-02'
+group by platform_modality
+order by sessions desc;
+
+-- how does this query differ from the above one?
+select platform_modality,
+count(distinct zion_anon_id) unique_visitors,
+count(distinct concat(event_date,zion_anon_id)) daily_unique_visitors,
+count(distinct session_id) sessions
+from ANALYTICS.PRODUCT.MART_USER_VIEWED_PAGE
+WHERE event_date between '2022-06-01' and '2022-06-02'
+group by platform_modality
+order by sessions desc;
+
+
+
+
+
+// which platform has the largest number of pageviews per user
+
+select platform_modality,
+count(distinct zion_anon_id) as duv, -- is this unique by day?
+count(distinct event_date) as pageviews -- this returns 2... we only had two pageviews?
+from ANALYTICS.PRODUCT.MART_USER_VIEWED_PAGE
+WHERE event_date between '2022-06-01' and '2022-06-02'
+group by platform_modality
+order by pageviews desc;
+
+// which platform has the stickiest users
+
+select platform_modality,
+count(distinct zion_anon_id) as duv
+from ANALYTICS.PRODUCT.MART_USER_VIEWED_PAGE
+WHERE event_date between '2022-06-01' and '2022-06-02'
+group by platform_modality
+order by platform_modality asc;
+
+-- "stickiest" would be the users that come back the most frequently, you need something like
+select zion_anon_id, count(distinct event_date) n_days
+
+
+
+// whats the most popular article in august
+
+SELECT
+  canonical_url,
+  COUNT(canonical_url) AS most_popular -- is this a count distinct? are you counting the right value?
+FROM ANALYTICS.PRODUCT.MART_USER_VIEWED_PAGE
+where event_date >'2022-7-31' 
+and event_date < '2022-8-30'
+GROUP BY canonical_url
+ORDER BY most_popular DESC
+
+
+// what was the least popular article in august
+
+SELECT
+  canonical_url,
+  COUNT(canonical_url) AS most_popular -- is this a count distinct? are you counting the right value?
+FROM ANALYTICS.PRODUCT.MART_USER_VIEWED_PAGE
+where EXTRACT(month FROM event_date) = 6 -- how many years worth of data will this return? did you try running this?
+GROUP BY canonical_url
+ORDER BY most_popular ASC
+
+
+
+// how many users on each platform were registered users on june 1?
+
+select sessions.platform_modality,sessions.is_registered_user,
+        count(distinct sessions.ZION_ANON_ID) as duv, -- if you had more than one day, would this be a daily unique?
+        count(distinct vc.IS_REGISTERED_USER) as isRegistered -- what does this do?
+from ANALYTICS.PRODUCT.MART_USER_VIEWED_PAGE as sessions
+    left join ANALYTICS.PRODUCT.MART_USER_VIEWED_COMPONENT as vc
+        on vc.zion_anon_id =sessions.zion_anon_id
+WHERE sessions.event_date = '2022-06-01'
+group by 1,2
+order by 2 desc;
+
+
+// build a case statement off of the URL that groups all articles into their 'section'... see which fields on the pageview table seem to try and replicate this, which come the closest
+
+
+SELECT canonical_url,
+    CASE 
+       WHEN canonical_url = 'https://www.cnn.com' THEN 'homepage'
+        WHEN canonical_url LIKE 'https://www.cnn.com/%' THEN 'article'
+        ELSE substr(canonical_url, 1,20)
+        END as content_type,
+        platform_modality
+        from analytics.product.mart_user_viewed_page
+        where event_date = current_date-3
+        and canonical_url not like '%edition.cnn.com%'
+        and canonical_url not like '%https://cnnespanol%'
+        and canonical_url not like 'https://z.cdp-dev.cn%'
+        and canonical_url not like '%https://www.cnn.com/markets%'
+        and canonical_url not like '%https://www.cnn.com/videos%'
+        and canonical_url not like 'https://www.cnn.com/audio%'
+        and canonical_url not like '%https://www.cnn.com/account/confirm%'
+        and canonical_url not like  '%https://arabic.cnn.com%'
+        and canonical_url not like '%https://www.cnn.com/profiles%'
+        and canonical_url not like '%https://money.cnn.com/data%'
+        and canonical_url not like '%https://money.cnn.com/quote%'
+        and canonical_url not like 'networktv'
+        and platform_modality <> 'mobile-native';
