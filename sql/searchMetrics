@@ -1,0 +1,119 @@
+
+-- WEEKLY LEVEL of most popular search terms by WEB
+
+select 
+    DATE_TRUNC('week', EVENT_TIMESTAMP) AS WEEK_OF,
+    search_text as searchTerm,
+    count(*) searchtext_Count 
+    FROM ZION_ENRICHED.USER.USER_SEARCHED
+    WHERE WEEK_OF BETWEEN '2010-01-01' and '2023-01-01'
+    AND PLATFORM = 'web'
+    AND search_text is not null and trim(search_text) !=''
+    group by 1,2
+    order by searchtext_Count desc
+
+-- WEEKLY LEVEL of most popular search terms by mob
+
+
+select 
+    DATE_TRUNC('week', EVENT_TIMESTAMP) AS WEEK_OF,
+    search_text as searchTerm,
+    count(*) searchtext_Count 
+    FROM ZION_ENRICHED.USER.USER_SEARCHED
+    WHERE WEEK_OF BETWEEN '2010-01-01' and '2023-01-01'
+    AND PLATFORM = 'mob'
+    AND search_text is not null and trim(search_text) !=''
+    group by 1,2
+    order by searchtext_Count desc
+
+
+-- WEEKLY LEVEL of number of users who have searched
+-- Conversion rate of number users who began a session by number users who searched 
+-- Search Conversion rate
+
+
+select
+    DATE_TRUNC('week', ZION_ENRICHED.USER.USER_VIEWED_PAGE.EVENT_TIMESTAMP) AS WEEK_OF,
+    ZION_ENRICHED.USER.USER_VIEWED_PAGE.platform,
+    COUNT(distinct ZION_ENRICHED.USER.USER_VIEWED_PAGE.zion_user_id) as Population,
+    COUNT(distinct ZION_ENRICHED.USER.USER_SEARCHED.zion_user_id) as sampleSize,
+    COUNT(distinct ZION_ENRICHED.USER.USER_SEARCHED.zion_user_id) /COUNT(distinct ZION_ENRICHED.USER.USER_VIEWED_PAGE.zion_user_id)  as conv_rt
+    from ZION_ENRICHED.USER.USER_VIEWED_PAGE
+    left join ZION_ENRICHED.USER.USER_SEARCHED
+    on ZION_ENRICHED.USER.USER_SEARCHED.zion_session_id = ZION_ENRICHED.USER.USER_VIEWED_PAGE.zion_session_id
+    where ZION_ENRICHED.USER.USER_VIEWED_PAGE.event_timestamp between '2022-01-11' and '2022-12-01'
+    AND PLATFORM = 'mob'
+    group by 1,2
+
+
+-- # Customers with a search
+
+select
+    DATE_TRUNC('week', ZION_ENRICHED.USER.USER_VIEWED_PAGE.EVENT_TIMESTAMP) AS WEEK_OF,
+    ZION_ENRICHED.USER.USER_VIEWED_PAGE.platform,
+    COUNT(distinct ZION_ENRICHED.USER.USER_VIEWED_PAGE.zion_user_id) as Population,
+    COUNT(distinct ZION_ENRICHED.USER.USER_SEARCHED.zion_user_id) as sampleSize,
+    COUNT(distinct ZION_ENRICHED.USER.USER_SEARCHED.zion_user_id) /COUNT(distinct ZION_ENRICHED.USER.USER_VIEWED_PAGE.zion_user_id)  as conv_rt
+    from ZION_ENRICHED.USER.USER_VIEWED_PAGE
+    left join ZION_ENRICHED.USER.USER_SEARCHED
+    on ZION_ENRICHED.USER.USER_SEARCHED.zion_session_id = ZION_ENRICHED.USER.USER_VIEWED_PAGE.zion_session_id
+    where ZION_ENRICHED.USER.USER_VIEWED_PAGE.event_timestamp between '2022-01-11' and '2022-12-01'
+    AND PLATFORM = 'mob'
+    group by 1,2
+
+
+
+
+-- # Searches with a click
+
+
+
+select
+    DATE_TRUNC('week', ZION_ENRICHED.USER.USER_VIEWED_PAGE.EVENT_TIMESTAMP) AS WEEK_OF,
+    ZION_ENRICHED.USER.USER_VIEWED_PAGE.platform,
+    COUNT(distinct ZION_ENRICHED.USER.USER_VIEWED_PAGE.zion_user_id) as Population,
+    COUNT(distinct ZION_ENRICHED.USER.USER_SEARCHED.zion_user_id) as sampleSize,
+    from ZION_ENRICHED.USER.USER_VIEWED_PAGE
+    left join ZION_ENRICHED.USER.USER_SEARCHED
+    on ZION_ENRICHED.USER.USER_SEARCHED.zion_session_id = ZION_ENRICHED.USER.USER_VIEWED_PAGE.zion_session_id
+    where ZION_ENRICHED.USER.USER_VIEWED_PAGE.event_timestamp between '2022-01-11' and '2022-12-01'
+    AND  = 'mob'
+    group by 1,2
+
+
+
+
+-- # of Customers with a search result click 
+
+select count(distinct zion_enriched.user.user_clicked_generic.zion_view_id)
+from zion_enriched.user.user_clicked_generic
+left join ZION_ENRICHED.USER.USER_SEARCHED
+on ZION_ENRICHED.USER.USER_SEARCHED.zion_anon_id = ZION_ENRICHED.USER.USER_SEARCHED.zion_anon_id
+where zion_enriched.user.user_clicked_generic.FCT_PAGE_SEARCH is not null
+and ZION_ENRICHED.USER.USER_SEARCHED.event_timestamp between '2022-01-11' and '2022-01-13'
+
+
+
+select 
+    COUNT(DISTINCT zion_enriched.user.user_clicked_generic.zion_view_id) as Population,
+    COUNT (DISTINCT ZION_ENRICHED.USER.USER_SEARCHED.zion_anon_id) as sampleSize,
+    COUNT (DISTINCT ZION_ENRICHED.USER.USER_SEARCHED.zion_anon_id) / COUNT(DISTINCT zion_enriched.user.user_clicked_generic.zion_view_id) as conv_rt
+    from zion_enriched.user.user_clicked_generic
+    left join ZION_ENRICHED.USER.USER_SEARCHED
+
+
+-- Customer conversion rate
+
+
+-- Ranked list of search terms for last week 
+
+select 
+    search_text as searchTerm,
+    count(*) searchtext_Count 
+    FROM ZION_ENRICHED.USER.USER_SEARCHED
+    WHERE EVENT_TIMESTAMP BETWEEN '2023-01-08' and '2023-01-14'
+    AND PLATFORM = 'web'
+    AND search_text is not null and trim(search_text) !=''
+    group by 1
+    order by searchtext_Count desc
+
